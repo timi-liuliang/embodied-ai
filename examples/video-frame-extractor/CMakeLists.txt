@@ -2,7 +2,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.28)
 
 # Project name
-PROJECT(auto-driving)
+PROJECT(video-frame-extractor)
 
 # Set c++ standard
 SET(CMAKE_CXX_STANDARD 17)
