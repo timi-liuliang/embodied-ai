@@ -21,4 +21,4 @@ ExternalProject_Add(
     INSTALL_COMMAND ""
 )
 
-SET_TARGET_PROPERTIES(${MODULE_NAME} PROPERTIES FOLDER "game/thirdparty/external")
+SET_TARGET_PROPERTIES(${MODULE_NAME} PROPERTIES FOLDER "/library/thirdparty")
