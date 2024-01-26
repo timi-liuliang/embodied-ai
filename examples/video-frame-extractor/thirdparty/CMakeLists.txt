@@ -1,2 +1,2 @@
 # Add thirdparty libraries
-ADD_SUBDIRECTORY("opencv-4.8")
+ADD_SUBDIRECTORY("opencv")
