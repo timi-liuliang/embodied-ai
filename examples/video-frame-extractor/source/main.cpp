@@ -1,39 +1,50 @@
 #include <iostream>
+#include <filesystem>
 #include <opencv2/opencv.hpp>
 
-int main() {
-    std::string videoPath = "D:/test/video.mp4";
-    std::string outputPath = "D:/test/input/";
-
-    cv::VideoCapture videoCapture(videoPath);
-
-    if (!videoCapture.isOpened()) 
+int main(int argc, char** argv) 
+{
+    if (argc > 1)
     {
-        std::cerr << "Error opening video file!" << std::endl;
-        return -1;
-    }
+        std::filesystem::path videoPath = argv[1];
+        if(videoPath.is_relative())
+            videoPath = std::filesystem::current_path() / videoPath;
 
-    int framesCapturePerSecond = 1;
-    double fps = videoCapture.get(cv::CAP_PROP_FPS);
-    int interval = cvRound(fps / framesCapturePerSecond);
+        std::filesystem::path outputPath = videoPath.parent_path() / "frames/";
+        if(!std::filesystem::exists(outputPath))
+            std::filesystem::create_directories(outputPath);
 
-    int frameCount = 0;
-    cv::Mat frame;
+        cv::VideoCapture videoCapture(videoPath.string());
 
-    while (videoCapture.read(frame)) 
-    {
-        if (frameCount % interval == 0)
+        if (!videoCapture.isOpened())
         {
-            std::string outputFilename = outputPath + "frame_" + std::to_string(frameCount) + ".jpg";
-            cv::imwrite(outputFilename, frame);
+            std::cerr << "Error opening video file!" << std::endl;
+            return -1;
         }
 
-        frameCount++;
+        int framesCapturePerSecond = 1;
+        double fps = videoCapture.get(cv::CAP_PROP_FPS);
+        int interval = cvRound(fps / framesCapturePerSecond);
+
+        int frameCount = 0;
+        cv::Mat frame;
+
+        while (videoCapture.read(frame))
+        {
+            if (frameCount % interval == 0)
+            {
+                std::filesystem::path outputFilename = outputPath / ("frame_" + std::to_string(frameCount) + ".jpg");
+                cv::imwrite(outputFilename.string(), frame);
+            }
+
+            frameCount++;
+        }
+
+        videoCapture.release();
+
+        std::cout << "Frames extracted: " << frameCount << std::endl;
+
     }
-
-    videoCapture.release();
-
-    std::cout << "Frames extracted: " << frameCount << std::endl;
 
     return 0;
 }
