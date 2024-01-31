@@ -4,47 +4,38 @@
 
 int main(int argc, char** argv) 
 {
-    if (argc > 1)
-    {
-        std::filesystem::path videoPath = argv[1];
-        if(videoPath.is_relative())
-            videoPath = std::filesystem::current_path() / videoPath;
+    // 读取两张图像
+    cv::Mat image1 = cv::imread("path_to_image1.jpg", cv::IMREAD_GRAYSCALE);
+    cv::Mat image2 = cv::imread("path_to_image2.jpg", cv::IMREAD_GRAYSCALE);
 
-        std::filesystem::path outputPath = videoPath.parent_path() / "frames/";
-        if(!std::filesystem::exists(outputPath))
-            std::filesystem::create_directories(outputPath);
+    // 初始化特征点检测器
+    cv::Ptr<cv::FeatureDetector> detector = cv::ORB::create();
 
-        cv::VideoCapture videoCapture(videoPath.string());
+    // 检测特征点
+    std::vector<cv::KeyPoint> keypoints1, keypoints2;
+    detector->detect(image1, keypoints1);
+    detector->detect(image2, keypoints2);
 
-        if (!videoCapture.isOpened())
-        {
-            std::cerr << "Error opening video file!" << std::endl;
-            return -1;
-        }
+    // 提取特征描述子
+    cv::Ptr<cv::DescriptorExtractor> extractor = cv::ORB::create();
+    cv::Mat descriptors1, descriptors2;
+    extractor->compute(image1, keypoints1, descriptors1);
+    extractor->compute(image2, keypoints2, descriptors2);
 
-        int framesCapturePerSecond = 1;
-        double fps = videoCapture.get(cv::CAP_PROP_FPS);
-        int interval = cvRound(fps / framesCapturePerSecond);
+    // 初始化特征匹配器
+    cv::Ptr<cv::DescriptorMatcher> matcher = cv::DescriptorMatcher::create("BruteForce");
 
-        int frameCount = 0;
-        cv::Mat frame;
+    // 特征点匹配
+    std::vector<cv::DMatch> matches;
+    matcher->match(descriptors1, descriptors2, matches);
 
-        while (videoCapture.read(frame))
-        {
-            if (frameCount % interval == 0)
-            {
-                std::filesystem::path outputFilename = outputPath / ("frame_" + std::to_string(frameCount) + ".jpg");
-                cv::imwrite(outputFilename.string(), frame);
-            }
+    // 绘制匹配结果
+    cv::Mat matchImage;
+    cv::drawMatches(image1, keypoints1, image2, keypoints2, matches, matchImage);
 
-            frameCount++;
-        }
-
-        videoCapture.release();
-
-        std::cout << "Frames extracted: " << frameCount << std::endl;
-
-    }
+    // 显示匹配结果
+    cv::imshow("Matches", matchImage);
+    cv::waitKey(0);
 
     return 0;
 }

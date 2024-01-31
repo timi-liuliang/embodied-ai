@@ -1,5 +1,5 @@
 # Set Module Name
-SET(MODULE_NAME video-frame-extractor)
+SET(MODULE_NAME featurepoint-extraction-and-matching)
 
 # message
 MESSAGE( STATUS "Configuring module: ${MODULE_NAME} ...")
