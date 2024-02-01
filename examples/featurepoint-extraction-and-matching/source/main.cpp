@@ -4,37 +4,63 @@
 
 int main(int argc, char** argv) 
 {
-    // 读取两张图像
-    cv::Mat image1 = cv::imread("path_to_image1.jpg", cv::IMREAD_GRAYSCALE);
-    cv::Mat image2 = cv::imread("path_to_image2.jpg", cv::IMREAD_GRAYSCALE);
+    // Set current path
+    std::filesystem::path executablePath = std::filesystem::path(argv[0]);
+    std::filesystem::path currentPath = executablePath.parent_path();
+    std::filesystem::current_path(currentPath);
 
-    // 初始化特征点检测器
-    cv::Ptr<cv::FeatureDetector> detector = cv::ORB::create();
+    // Config two image path
+    std::filesystem::path image1Path = std::filesystem::current_path() / "data/IMG_0400.jpg";
+    std::filesystem::path image2Path = std::filesystem::current_path() / "data/IMG_0401.jpg";
 
-    // 检测特征点
+    // Read two images
+    cv::Mat image1 = cv::imread( image1Path.string(), cv::IMREAD_GRAYSCALE);
+    cv::Mat image2 = cv::imread( image2Path.string(), cv::IMREAD_GRAYSCALE);
+
+    double imageWidth = image1.cols;
+    double imageHeight = image1.rows;
+
+    // Initialize feature point detector
+    cv::Ptr<cv::ORB> detector = cv::ORB::create();
+    detector->setMaxFeatures(1024);
+
+    // Detect feature points
     std::vector<cv::KeyPoint> keypoints1, keypoints2;
     detector->detect(image1, keypoints1);
     detector->detect(image2, keypoints2);
 
-    // 提取特征描述子
-    cv::Ptr<cv::DescriptorExtractor> extractor = cv::ORB::create();
+    // Extract feature descriptors
+    cv::Ptr<cv::ORB> extractor = cv::ORB::create();
     cv::Mat descriptors1, descriptors2;
     extractor->compute(image1, keypoints1, descriptors1);
     extractor->compute(image2, keypoints2, descriptors2);
 
-    // 初始化特征匹配器
+    // Initialize feature matcher
     cv::Ptr<cv::DescriptorMatcher> matcher = cv::DescriptorMatcher::create("BruteForce");
 
-    // 特征点匹配
+    // Match feature points
     std::vector<cv::DMatch> matches;
     matcher->match(descriptors1, descriptors2, matches);
 
-    // 绘制匹配结果
+    // Draw matching results
     cv::Mat matchImage;
     cv::drawMatches(image1, keypoints1, image2, keypoints2, matches, matchImage);
 
-    // 显示匹配结果
-    cv::imshow("Matches", matchImage);
+    // Display matching results
+    cv::Size displaySize(imageWidth * 2.0 / 6.0, imageHeight * 2.0 / 12.0);
+    cv::Mat resizedImage;
+    cv::resize(matchImage, resizedImage, displaySize);
+    cv::imshow("Matches", resizedImage);
+
+    // Adjust window position
+    int screenWidth = 1920;
+    int screenHeight = 1080;
+    int windowWidth = displaySize.width;
+    int windowHeight = displaySize.height;
+
+    int windowLeft = (screenWidth - windowWidth) / 2;
+    int windowTop = (screenHeight - windowHeight) / 2;
+    cv::moveWindow("Matches", windowLeft, windowTop);
     cv::waitKey(0);
 
     return 0;

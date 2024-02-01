@@ -50,6 +50,13 @@ IF(WIN32)
 		COMMAND ${CMAKE_COMMAND} -E copy 
 		${PROJECT_SOURCE_DIR}/thirdparty/opencv/src/opencv-4.9/build/bin/opencv_videoio_ffmpeg490_64.dll 
 		${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release/opencv_videoio_ffmpeg490_64.dll)
+
+	# Copy data
+	ADD_CUSTOM_COMMAND(
+		TARGET ${MODULE_NAME} PRE_BUILD 
+		COMMAND ${CMAKE_COMMAND} -E copy_directory
+		${PROJECT_SOURCE_DIR}/data/ 
+		${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug/data/)
 ENDIF()
 
 # Set Folder
