@@ -69,7 +69,7 @@ int main(int argc, char** argv)
             if (!videoWriter.isOpened()) 
             {
                 startTime = std::chrono::steady_clock::now();
-                std::string filename = "video_" + std::to_string(startTime.time_since_epoch().count()) + ".mp4";
+                std::string filename = currentPath.string() + ("/video_" + std::to_string(startTime.time_since_epoch().count()) + ".avi");
                 videoWriter.open(filename, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 24, cv::Size(frame.cols, frame.rows));
             }
             videoWriter.write(frame);
@@ -82,7 +82,7 @@ int main(int argc, char** argv)
             if (elapsedSec.count() >= videoDuration)
             {
                 videoWriter.release();
-                std::cout << "Video saved: " + std::to_string(startTime.time_since_epoch().count()) + ".mp4" << std::endl;
+                std::cout << "Video saved: " << std::endl;
             }
         }
 
